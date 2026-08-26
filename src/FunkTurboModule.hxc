@@ -1,0 +1,127 @@
+package funkin.modding;
+
+import flixel.FlxSprite;
+import flixel.FlxG;
+import funkin.save.Save;
+import funkin.ui.options.OptionsState;
+import funkin.ui.options.PreferencesMenu;
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+
+/**
+ * Funk-O-Turbo: Sistem kaynaklarını ritim odaklı optimize eden performans kalkanı.
+ * Düşük donanımlı PC'ler için Protokol-66 tarafından stabilize edildi.
+ */
+class FunkTurboModule extends Module
+{
+    public static var gameTurboEnabled:Bool = false;
+    public static var hideStage:Bool = false;
+    public static var staticChars:Bool = false;
+
+    var turboPageInjected:Bool = false;
+    public static inline var RAM_CRITICAL:Int = 750;
+    static var _globalCleanTimer:Float = 0;
+
+    public function new() { super("Funk-O-Turbo"); }
+
+    override function onStateChangeEnd(event)
+    {
+        var state = event.targetState;
+        if (!(state is OptionsState)) { turboPageInjected = false; return; }
+        if (turboPageInjected) return;
+        turboPageInjected = true;
+
+        var save = Save.instance.modOptions;
+        
+        // Varsayılan Ayarlar
+        if (save.get("funkTurbo") == null) save.set("funkTurbo", false);
+        if (save.get("hideStage") == null) save.set("hideStage", false);
+        if (save.get("staticChars") == null) save.set("staticChars", false);
+
+        gameTurboEnabled = save.get("funkTurbo");
+        hideStage = save.get("hideStage");
+        staticChars = save.get("staticChars");
+        
+        var codex = state.optionsCodex;
+        var page = codex.addPage("funkTurbo", new PreferencesMenu());
+        page.onExit.add(function() { codex.switchPage("options"); });
+
+        page.items.clear();
+        page.preferenceItems.clear();
+
+        var options = codex.pages.get("options");
+        var moved = [];
+        
+        // Menü Hizalama
+        for (i => item in options.items.members) {
+            if (i < 2) continue;
+            item.y += 160; 
+            options.items.remove(item);
+            moved.push(item);
+        }
+
+        var btn = options.items.createItem(0, options.items.members[1].y + 160, "FUNK-O-TURBO AYARLARI", "bold", function() { options.onSwitch.dispatch("funkTurbo"); });
+        btn.x = (FlxG.width - btn.width) / 2;
+        for (item in moved) options.items.add(item);
+
+        // --- PERFORMANS SEÇENEKLERİ ---
+
+        page.createPrefItemCheckbox(
+            "Funk-O-Turbo Modu",
+            "Sistem kaynaklarını optimize ederek FPS değerini sabitler ve gecikmeleri önler.",
+            function(v) {
+                save.set("funkTurbo", v);
+                gameTurboEnabled = v;
+                Save.instance.flush();
+                if (v) FlxG.drawFramerate = 60;
+            },
+            save.get("funkTurbo")
+        );
+
+        page.createPrefItemCheckbox(
+            "Gorsel Sahneyi Gizle",
+            "Arkaplani tamamen devre disi birakir. Islemci ve ekran karti yukunu minimuma indirir.",
+            function(v) {
+                save.set("hideStage", v);
+                hideStage = v;
+                Save.instance.flush();
+            },
+            save.get("hideStage")
+        );
+
+        page.createPrefItemCheckbox(
+            "Statik Karakter Modu",
+            "Karakter animasyonlarini dondurur. RAM kullanimini onemli olcude azaltir.",
+            function(v) {
+                save.set("staticChars", v);
+                staticChars = v;
+                Save.instance.flush();
+            },
+            save.get("staticChars")
+        );
+    }
+
+    public static function turboTick(elapsed:Float):Void
+    {
+        if (!gameTurboEnabled) return;
+        var state = PlayState.instance;
+        if (state == null) return;
+
+        if (hideStage && state.currentStage != null) state.currentStage.visible = false;
+        
+        if (staticChars) {
+            if (state.boyfriend != null) state.boyfriend.active = false;
+            if (state.dad != null) state.dad.active = false;
+            if (state.gf != null) state.gf.active = false;
+        }
+
+        _globalCleanTimer += elapsed;
+        if (_globalCleanTimer > 0.4) {
+            _globalCleanTimer = 0;
+            FlxG.camera.antialiasing = false;
+            #if cpp
+            if (Std.int(haxe.Sys.getMemoryUsage() / 1024 / 1024) > RAM_CRITICAL) cpp.vm.Gc.run(true);
+            #end
+        }
+    }
+}

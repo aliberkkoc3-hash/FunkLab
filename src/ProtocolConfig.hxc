@@ -1,0 +1,75 @@
+package funkin.modding;
+
+import flixel.FlxG;
+import funkin.save.Save;
+import funkin.ui.options.OptionsState;
+import funkin.ui.options.PreferencesMenu;
+import funkin.modding.module.Module;
+
+/**
+ * Funk-O-Protokol: Protokol-66'nin ritim operasyonlarini yonetir.
+ * Mutlak Hassasiyet ve Hayalet Skor kontrol merkezi.
+ */
+class ProtocolConfig extends Module
+{
+    var configPageInjected:Bool = false;
+
+    public function new() { super("Funk-O-Protokol"); }
+
+    override function onStateChangeEnd(event)
+    {
+        var state = event.targetState;
+        if (!(state is OptionsState)) { configPageInjected = false; return; }
+        if (configPageInjected) return;
+        configPageInjected = true;
+
+        var save = Save.instance.modOptions;
+        if (save.get("pureSick") == null) save.set("pureSick", true);
+        if (save.get("ghostScore") == null) save.set("ghostScore", false);
+
+        var codex = state.optionsCodex;
+        var page = codex.addPage("protocolConfig", new PreferencesMenu());
+        page.onExit.add(function() { codex.switchPage("options"); });
+
+        page.items.clear();
+        page.preferenceItems.clear();
+
+        var options = codex.pages.get("options");
+        var moved = [];
+
+        for (i => item in options.items.members) {
+            if (i < 2) continue;
+            item.y += 240; 
+            options.items.remove(item);
+            moved.push(item);
+        }
+
+        var btn = options.items.createItem(0, options.items.members[1].y + 240, "FUNK-O-PROTOKOL", "bold", function() { options.onSwitch.dispatch("protocolConfig"); });
+        btn.x = (FlxG.width - btn.width) / 2;
+        for (item in moved) options.items.add(item);
+
+        // --- PROTOKOL KONTROL SECENEKLERI ---
+
+        page.createPrefItemCheckbox(
+            "Mutlak Hassasiyet",
+            "AKTIFKEN: Protokol-66 her notayi kusursuz bir zamanlamayla isler. KAPALIYKEN: Bot, insan taklidi yaparak dogal bir ritim yakalar.",
+            function(v) {
+                save.set("pureSick", v);
+                Save.instance.flush();
+                trace("Funk-O-Protokol: Hassasiyet Modu -> " + (v ? "MAKSIMUM" : "DOGAL"));
+            },
+            save.get("pureSick")
+        );
+
+        page.createPrefItemCheckbox(
+            "Hayalet Skor",
+            "AKTIFKEN: Protokol-66 notalari yonetir ama skor verilerini sisteme islemez. Hicbir iz birakmaz.",
+            function(v) {
+                save.set("ghostScore", v);
+                Save.instance.flush();
+                trace("Funk-O-Protokol: Hayalet Modu -> " + v);
+            },
+            save.get("ghostScore")
+        );
+    }
+}

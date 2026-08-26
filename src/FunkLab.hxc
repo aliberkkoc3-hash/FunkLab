@@ -1,0 +1,271 @@
+package funkin.modding;
+
+import flixel.FlxG;
+import flixel.util.FlxColor;
+import flixel.util.FlxTimer;
+import haxe.ds.StringMap;
+import funkin.Conductor;
+import funkin.Highscore;
+import funkin.play.PlayState;
+import funkin.play.notes.NoteSprite;
+import funkin.play.scoring.Scoring;
+import funkin.modding.events.HitNoteScriptEvent;
+import funkin.modding.events.ScriptEvent;
+import funkin.modding.events.SongLoadScriptEvent;
+import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.Constants;
+import funkin.util.ReflectUtil;
+import funkin.save.Save;
+import Reflect;
+
+class FunkLabModule extends Module
+{
+    public static var isFunkLabActive:Bool = false;
+    public static var accuracy:Float = 100.0;
+    public static var combo:Int = 0;
+
+    var didit:Bool = false;
+    var lastFunkLabText:String = null;
+    var heldHoldDirections:StringMap;
+    var lastDodgedHitTime:Float = -1;
+
+    public static var ignoreKinds:Array<String>;
+
+    public function new()
+    {
+        super("FunkLabModule");
+        isFunkLabActive = false;
+        heldHoldDirections = new StringMap();
+        // Tehlikeli nota listesi (Gormezden gelinecekler)
+        ignoreKinds = [
+            "hurt","trap","death","kill","deadly","bone","bluebone",
+            "bluebounce","bone_blue","bone_death","fire","poison","fatal","ban",
+            "glitch","gf glitch","bothsings","hurt note","death note","trap note",
+            "hell","ex"
+        ];
+    }
+
+    override function onSongLoaded(e:SongLoadScriptEvent):Void
+    {
+        if (Save.instance.modOptions.get("FunkLab") == null)
+            Save.instance.modOptions.set("FunkLab", false);
+
+        isFunkLabActive = Save.instance.modOptions.get("FunkLab");
+        lastDodgedHitTime = -1;
+        applyFunkLabOptimizations();
+    }
+
+    // ============================================================
+    // SUSTAIN (UZUN NOTA) PUAN ENGELI (GHOST MODE)
+    // ============================================================
+    override function onNoteHoldHit(e:ScriptEvent):Void
+    {
+        // Hayalet Modu aciksa uzun notalarin puan sızıntısını durdur
+        if (isFunkLabActive && Save.instance.modOptions.get("ghostScore") == true)
+        {
+            e.score = 0;
+            e.healthChange = 0;
+        }
+    }
+
+    override function onNoteHit(e:HitNoteScriptEvent):Void
+    {
+        // Genel vurus olayinda Ghost Mode kontrolu
+        if (isFunkLabActive && Save.instance.modOptions.get("ghostScore") == true)
+        {
+            e.score = 0;
+            e.healthChange = 0;
+            e.isComboBreak = false;
+        }
+    }
+
+    function goodNoteHit(note:NoteSprite, state:PlayState):Void
+    {
+        if (note == null || note.noteData == null || state == null) return;
+        if (note.hasBeenHit) return;
+
+        // Ayarları Save sisteminden çek
+        var isPure:Bool = Save.instance.modOptions.get("pureSick") != false;
+        var isGhost:Bool = Save.instance.modOptions.get("ghostScore") == true;
+
+        // --- RITIM SENKRONIZASYONU ---
+        // Mutlak Hassasiyet kapaliysa +/- 55ms sapma ile dogal vurus sagla
+        var hitTimeOffset:Float = isPure ? 0 : (Math.random() * 110 - 55);
+
+        var score = Scoring.scoreNote(hitTimeOffset);
+        var daRating = Scoring.judgeNote(hitTimeOffset);
+
+        if (isGhost) score = 0;
+
+        var hitEvent = new HitNoteScriptEvent(note, Constants.HEALTH_SICK_BONUS, score, daRating, false, 0, hitTimeOffset, true);
+
+        if (isGhost) {
+            hitEvent.score = 0;
+            hitEvent.healthChange = 0;
+            hitEvent.isComboBreak = false;
+        }
+
+        state.dispatchEvent(hitEvent);
+        if (hitEvent.eventCanceled) return;
+
+        // Istatistikleri Ghost Mode degilse guncelle
+        if (!isGhost) {
+            Highscore.tallies.totalNotesHit++;
+            if (daRating == "sick") Highscore.tallies.sickNotes++;
+        }
+
+        var sl = state.playerStrumline;
+        sl.hitNote(note);
+        sl.noteVibrations.tryNoteVibration();
+
+        if (note.holdNoteSprite != null)
+        {
+            if (sl.isPlayer)
+                sl.pressKey(note.holdNoteSprite.noteDirection);
+            sl.playNoteHoldCover(note.holdNoteSprite);
+        }
+
+        if (!isGhost) {
+            state.vocals.playerVolume = 1;
+            state.applyScore(hitEvent.score, hitEvent.judgement, hitEvent.healthChange, hitEvent.isComboBreak);
+            state.popUpScore(hitEvent.judgement);
+        }
+
+        if (state.currentStage != null)
+        {
+            var player = state.currentStage.getPlayer();
+            if (player != null)
+                player.holdTimer = 0;
+            
+            if (!isGhost)
+                state.currentStage.getGirlfriend()?.playComboAnimation(Highscore.tallies.combo);
+        }
+    }
+
+    function handleAutoMiss(e:Dynamic):Void
+    {
+        if (!isFunkLabActive) return;
+        if (e.note == null || isDangerous(e.note)) return;
+        
+        e.cancel();
+        goodNoteHit(e.note, PlayState.instance);
+    }
+
+    function onNoteMiss(e:Dynamic):Void { handleAutoMiss(e); }
+    function onNoteGhostMiss(e:Dynamic):Void { if (isFunkLabActive) e.cancel(); }
+    function onNoteHoldDrop(e:Dynamic):Void { handleAutoMiss(e); }
+
+    function isDangerous(n:NoteSprite):Bool
+    {
+        if (n == null) return false;
+        var text = (n.kind != null ? Std.string(n.kind).toLowerCase() : "");
+        for (kw in ignoreKinds) { if (text.indexOf(kw) != -1) return true; }
+        return false;
+    }
+
+    override function onUpdate(e:ScriptEvent):Void
+    {
+        onUpdatePause();
+
+        var s = PlayState.instance;
+        if (!isFunkLabActive || s == null || s.isGamePaused || s.playerStrumline == null || s.startingSong || s.isInCutscene)
+            return;
+
+        var sl = s.playerStrumline;
+        var c = Conductor.instance;
+
+        // Verileri Public Static olarak tutmaya devam ediyoruz
+        accuracy = Highscore.tallies.accuracy * 100.0;
+        combo = Highscore.tallies.combo;
+
+        var previousCombo = Highscore.tallies.combo;
+        var previousMaxCombo = Highscore.tallies.maxCombo;
+
+        // Nota Isleme Dongusu
+        for (n in sl.getNotesMayHit())
+        {
+            if (n == null || !n.alive || n.hasBeenHit || isDangerous(n)) continue;
+            if (c.songPosition >= n.strumTime) goodNoteHit(n, s);
+        }
+
+        for (n in sl.notes.members)
+        {
+            if (n == null || !n.alive || n.hasBeenHit || isDangerous(n)) continue;
+            if (c.songPosition >= n.strumTime) goodNoteHit(n, s);
+        }
+
+        // Sustain (Uzun Nota) Takibi
+        for (h in sl.holdNotes.members)
+        {
+            if (h == null) continue;
+            var holdKey = Std.string(h.noteDirection) + "_" + Std.string(h.strumTime);
+            if (h.alive && h.hitNote && !h.missedNote && h.sustainLength > 0 && sl.isPlayer)
+            {
+                if (!heldHoldDirections.exists(holdKey))
+                {
+                    sl.pressKey(h.noteDirection);
+                    heldHoldDirections.set(holdKey, true);
+                }
+            }
+            else if (heldHoldDirections.exists(holdKey))
+            {
+                sl.releaseKey(h.noteDirection);
+                heldHoldDirections.remove(holdKey);
+            }
+        }
+
+        if (Highscore.tallies.combo < previousCombo) Highscore.tallies.combo = previousCombo;
+        if (Highscore.tallies.maxCombo < previousMaxCombo) Highscore.tallies.maxCombo = previousMaxCombo;
+    }
+
+    function onUpdatePause():Void
+    {
+        var substateClassName = ReflectUtil.getClassNameOf(FlxG.state.subState);
+        if (substateClassName == null || substateClassName.indexOf("PauseSubState") == -1) { didit = false; return; }
+
+        var pauseState:Dynamic = FlxG.state.subState;
+        if (!didit) { didit = true; pauseState.persistentUpdate = false; }
+
+        var menuEntries = pauseState.currentMenuEntries;
+        var funkLabText = "FunkLab: " + (isFunkLabActive ? "AKTIF" : "AKTIF DEGIL");
+        
+        var found = false;
+        for (i in 0...menuEntries.length) {
+            if (menuEntries[i].text.indexOf("FunkLab:") == 0) {
+                found = true;
+                if (menuEntries[i].text != funkLabText) menuEntries[i].text = funkLabText;
+                break;
+            }
+        }
+
+        if (!found) {
+            menuEntries.insert(menuEntries.length > 2 ? menuEntries.length - 2 : menuEntries.length, {
+                text: funkLabText,
+                callback: function() {
+                    isFunkLabActive = !isFunkLabActive;
+                    Save.instance.modOptions.set("FunkLab", isFunkLabActive);
+                    applyFunkLabOptimizations();
+                    pauseState.clearAndAddMenuEntries();
+                    pauseState.changeSelection();
+                }
+            });
+            pauseState.clearAndAddMenuEntries();
+            pauseState.changeSelection();
+        }
+    }
+
+    function applyFunkLabOptimizations():Void
+    {
+        if (!isFunkLabActive) return;
+        var s = PlayState.instance;
+        if (s == null) return;
+        if (s.currentStage != null)
+        {
+            if (Reflect.hasField(s.currentStage, "fog")) {
+                var fog = Reflect.field(s.currentStage, "fog");
+                if (fog != null) { fog.visible = false; fog.active = false; }
+            }
+        }
+    }
+}

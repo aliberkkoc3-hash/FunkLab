@@ -1,0 +1,10 @@
+{
+  "title": "FunkLab - Protokol-66",
+  "description": "Protokol-66 devrede: Mekanik klavyeleri issiz birakan, usengec onayli ritim cekirdegi. AliBerk laboratuvarlarindan kacmistir.",
+  "author": "[BF]AliBerk[BF]",
+  "api_version": "0.8.6",
+  "mod_version": "0.1.3",
+  "license": "MIT",
+  "dependencies": {},
+  "supported_api_versions": ["0.8.6"]
+}

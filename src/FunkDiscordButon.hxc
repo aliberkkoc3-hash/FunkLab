@@ -1,0 +1,67 @@
+package funkin.modding;
+
+import funkin.modding.module.Module;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.ui.UIState;
+import funkin.util.WindowUtil;
+import funkin.Paths;
+import flixel.FlxG;
+
+/**
+ * FunkDiscordButon: FUNKLAB Karargah Kapısı.
+ * Animasyon hızı Protokol-66 tarafından stabilize edildi.
+ */
+class FunkDiscordButon extends Module {
+    final url = "https://discord.gg/khpuvUcGMz";
+
+    public function new() {
+        super("FunkDiscordButon");
+    }
+
+    override function onStateChangeEnd(event) {
+        if (event.targetState is MainMenuState) {
+            var state:MainMenuState = event.targetState;
+            var items = state.menuItems;
+
+            if (items.getItem('funklab') != null) return;
+
+            var moved = [];
+            for (i => item in items.members) {
+                if (i < 3) continue; 
+                item.y += 150; 
+                items.remove(item);
+                moved.push(item);
+            }
+
+            state.createMenuItem('funklab', 'mainmenu/FUNKLAB', function() {
+                state.uiStateMachine.transition(UIState.Idle);
+                WindowUtil.openURL(url);
+            });
+
+            var menuItem = items.getItem('funklab');
+            if (menuItem != null) {
+                try {
+                    menuItem.frames = Paths.getSparrowAtlas('mainmenu/FUNKLAB');
+                    
+                    // --- ANIMASYON HIZI AYARI (STABILIZASYON) ---
+                    // 24 yerine 12 yaparak idle animasyonunu yavaslattik
+                    menuItem.animation.addByPrefix('idle', 'discord idle', 12, true); 
+                    
+                    // Seçildiğinde biraz daha hızlı (18 FPS) parlamaya devam etsin
+                    menuItem.animation.addByPrefix('selected', 'discord selected', 18, true);
+                    
+                    menuItem.animation.play('idle');
+                } catch(e:Dynamic) {
+                    trace("Funk-O-Matic Hata: FUNKLAB dosyalari hala kayip!");
+                }
+
+                menuItem.x = FlxG.width / 2;
+                menuItem.y = items.members[2].y + 150; 
+                menuItem.scrollFactor.set(0, (items.members.length - 1) / 10);
+                
+                for (a in moved) items.add(a);
+                for (a in items.members) a.scrollFactor.y += 0.1;
+            }
+        }
+    }
+}
