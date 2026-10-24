@@ -1,39 +1,43 @@
-# 🛡️ PROTOKOL-66: MASAÜSTÜ GÜVENLİK VE SİSTEM HAKİMİYETİ
+# Prism Crew Studio — Security Policy
 
-Bak hâlâ okuyor... Kardeşim burası Protokol-66'nın kara kutusudur. Eğer burayı okuyacak kadar vaktin varsa, ya parmakların çoktan emekli olmuştur ya da işlemcinin çıkardığı o zafer çığlığı (fan sesi) seni korkutmuştur. 
+**Version:** 1.0  
+**Effective Date:** October 24, 2026  
+**Copyright:** © 2026 Prism Crew Studio. All rights reserved.
 
-Bu belge, **[BF]AliBerk[BF]** tarafından sistemdeki tüm yetenek açıklarını kapatmak ve mekanik klavyelerin psikolojisini bozmak için yayınlanmıştır.
+### 1. Our Objective
 
-## 🚀 AKTİF OPERASYON SAHALARI (SÜRÜMLER)
+At Prism Crew Studio, we prioritize the security of our projects, source code, and users. This policy outlines how security vulnerabilities discovered in our projects should be reported and addressed.
 
-Aşağıdaki sürümler Protokol-66'nın mutlak koruması ve siber hakimiyeti altındadır. Eski "mutfak robotu" sürümü (v0.1.2 ve altı) çoktan dijital çöplüğe süpürülmüştür.
+### 2. Supported Versions
 
-| Sürüm | Güvenlik Durumu | Protokol Seviyesi |
-| :--- | :---: | :--- |
-| v0.1.3 (PC) | ✅ ÇELİK ZIRH | Protokol-66 Ana Çekirdek |
-| v0.1.2 < | ❌ SİSTEM DIŞI | Tasfiye Edilen Deneyler |
+Security updates are provided for project versions that we actively maintain and explicitly support. The support status for each project is specified within its respective repository.
 
-## 🕵️‍♂️ SİSTEM SIZINTISI BİLDİRİMİ (HATA/BUG)
+### 3. Reporting Vulnerabilities
 
-Eğer sistemde bir sızıntı (botun notayı tokatlamak yerine sana "ZORT" demesi veya oyunun aniden masaüstüne fırlaması gibi) bulursan, bunu botun yapay zekasına belli etmeden raporlamalısın. Protokol-66 hata yaptığını anlarsa utancından bilgisayarını bir hesap makinesine dönüştürebilir!
+If you discover a security vulnerability, please:
 
-**Raporlama Prosedürü:**
-1.  **Gizli Hat:** [The Pixel Devs Discord Karargahı](https://discord.gg/khpuvUcGMz) üzerinden **AliBerk**'e "Dosyada sızıntı var reis" parolasıyla mesaj at.
-2.  **Delilleri Gizle:** Botun donduğu veya saçmaladığı anın ekran görüntüsünü al, ama botun kameradan seni görmediğinden emin ol.
-3.  **Sakinliğini Koru:** AliBerk en kısa sürede "Sistem Stabilizasyon Operasyonu"nu başlatacaktır.
+- Report it privately to Prism Crew Studio before disclosing it publicly.
+- Identify the affected project and version.
+- Describe the impact of the vulnerability and, if possible, provide steps to reproduce it.
+- Do not include passwords, access keys, or other personal/sensitive information in your report.
 
-## 🛡️ PROTOKOL-66 GÜVENLİK GARANTİSİ
+For reporting, please use the *Private vulnerability reporting* feature found under the **Security** tab of the relevant GitHub repository. If this feature is unavailable, please use the private communication channel specified by the repository maintainer.
 
-*   **Derin Devlet Modu (Ghost Score):** Aktifken bot notaların canına okur ama skor tabelası sanki hiçbir şey olmamış gibi '0' kalır. Kimse senin o efsanevi vuruşlarını kanıtlayamaz. Tam bir dijital hayalet!
-*   **Donanım Koruma (Funk-O-Turbo):** İşlemcini Protokol-66'nın hızına uydurmak için kırbaçlar. Tost makinesinden hallice olan laptopunun alev almasını (şimdilik) engeller.
-*   **Nükleer Reset (F8):** Ebeveynlerin odaya girdiğinde veya NinjaMuffin kapına dayandığında `F8` tuşuna bas. Protokol-66 tüm dijital izlerini saniyeler içinde temizler ve sistemi başlangıç ekranına fırlatır.
+### 4. Responsible Disclosure
 
-## ⚠️ KRİTİK VE SİNSİ UYARILAR
+We request that you allow a reasonable amount of time for us to investigate, verify, and remediate any reported vulnerabilities. Vulnerabilities should not be disclosed publicly without prior coordination with Prism Crew Studio.
 
-1.  **Blue Switch Dramı:** Eğer mekanik klavyen "Neden kimse üzerime basmıyor?" diye ağlama sesleri çıkarırsa, kulaklığını tak ve botun ritmine odaklan. Duygulara yer yok, sadece nota tasfiyesi var!
-2.  **İşlemci Isınması:** Kasanın içinden duman çıkıyorsa, bu Protokol-66'nın işlemciye "Sen kimsin de bana yetişemiyorsun?" demesidir. Normaldir, işlemciye biraz saygı duy.
-3.  **İnternet Geçmişi Kontrolü:** Protokol-66 saniyede binlerce veriyi tarar. Eğer bot duraklatma menüsünde sana "O arama geçmişi ne öyle kanka?" derse, bilgisayarı hemen camdan aşağı fırlat ve bir ormana yerleş. Biz bile seni kurtaramayız.
+We do not guarantee that every report will be accepted, resolved within a specific timeframe, or eligible for a reward.
+
+### 5. Scope and Limitations
+
+Security research must be conducted only on systems for which you have authorization and in compliance with all applicable laws. Do not access user data, disrupt services, or put others' systems at risk by testing for vulnerabilities.
+
+### 6. Communication
+
+For security-related notifications, use the security contact method specified in the GitHub repository for the relevant project. Do not assume or guess a contact address that has not been explicitly provided.
 
 ---
-**Pixel Devs Studio & AliBerk Operasyon Birimi.**
-*Sisteminiz Protokol-66'ya emanet, peki ya vicdanınız?*
+
+**Prism Crew Studio**  
+*Beyond the Spectrum*
