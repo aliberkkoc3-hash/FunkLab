@@ -1,7 +1,17 @@
 {
   "title": "FunkLab - Protokol-66",
-  "description": "Protokol-66 devrede: Mekanik klavyeleri issiz birakan, usengec onayli ritim cekirdegi. AliBerk laboratuvarlarindan kacmistir.",
+  "description": "Protokol-66 devrede: Mekanik klavyeleri işsiz birakan, üşengec onaylı ritim çekirdeği. AliBerk laboratuvarlarından kaçmıştır.",
   "author": "[BF]AliBerk[BF]",
+  "contributors": [
+    {
+      "name": "[BF]AliBerk[BF]",
+      "role": "Developer"
+    },
+    {
+      "name": "Prism Crew Studio",
+      "role": "Development Support and License Holder"
+    }
+  ],
   "api_version": "0.8.6",
   "mod_version": "0.1.3",
   "license": "MIT",
