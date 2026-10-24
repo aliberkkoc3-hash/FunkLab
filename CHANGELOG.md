@@ -4,6 +4,9 @@ Bütün değişimler burada. Okumayacağını biliyoruz ama yine de yazdık. Ned
 
 ---
 
+## [v0.1.3] - **Dökümantasyon ve Stüdyo Güncellemesi**
+*Tarih: 24-10-2026 21:32* **(LICENSE VE SECURITY GÜNCELLEMESİ VE STÜDYO ADI DEĞİŞİMİ)**
+
 ## [v0.1.3] - "Protokol-66: Sistemsel Hakimiyet" 🛡️💻
 *Tarih: 26-08-2026 16:30 (NinjaMuffin'in importları sakladığı, bizim ise klavyeleri işsiz bıraktığımız o kutlu gün)*
 
@@ -38,5 +41,6 @@ Funk-O-Matic 9000 mutfak robotu gibi hissettirmeye başlamıştı, biz de onu em
 - **Protokol-66 Sentience:** Botun duraklatma menüsünde seninle "Neden hiç basmıyorsun kanka?" diye tartışmaya başlaması.
 - **Klavye Yorgunluğu:** Bot nota vurdukça kasadan mekanik klavye sesi çıkarma özelliği (Komşular seni pro sansın).
 
-**Pixel Devs Studio & AliBerk**
+**Prism Crew & AliBerk**
+**SPEKTRUMUN ÖTESİNDE**
 *"Protokol-66 devreye girdi, mekanik klavyen artık sadece RGB ışıklı birer gece lambası."*
