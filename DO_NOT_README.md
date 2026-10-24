@@ -67,7 +67,7 @@ Bu bir PC Portudur. Haliyle bazı "Protokol Özellikleri" (siz hata diyorsunuz) 
 
 Bu operasyonda parmağı olanlar:
 - [BF]AliBerk[BF]: Protokol-66'yı serbest bırakan, klavyeleri işsiz bırakan başsuçlu.
-- The Pixel Devs Studio: Kaosun ve üşengeçliğin orijinal mimarları.
+- PRİSM CREW: Kaosun ve üşengeçliğin orijinal mimarları.
 - Protokol-66: Monitörünün yeni sahibi ve ritim dünyasının tek celladı.
 
 Kulağına küpe olsun: Protokol-66 notaları vururken ekrandan sana bakıp 
@@ -93,5 +93,5 @@ göz kırparsa normaldir. Ama kahvenden bir yudum alırsa... İşte o zaman kaç
                      |________________|
 
 ##################################################################################
-#         The Pixel Devs Studio & AliBerk sundu: Protokol-66 affetmez!           #
+#        PRİSM CREW AltYapıyı Ele Aldı & AliBerk Sundu: Protokol-66 Affetmez!    #
 ##################################################################################
